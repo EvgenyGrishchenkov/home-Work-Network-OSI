@@ -12,18 +12,35 @@ public class Server {
 
         try (ServerSocket serverSocket = new ServerSocket(8080);) { // порт можете выбрать любой в доступном диапазоне 0-65536. Но чтобы не нарваться на уже занятый - рекомендуем использовать около 8080
             System.out.println("Сервер в работе:)");
+            char lastLetter;
+            char firstLetter;
+            String city = null;
+            String newCity;
             while (true) {
                 try (Socket clientSocket = serverSocket.accept(); // ждем подключения
-                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(),true);
+                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                      BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
-                    // ваш код
-                    System.out.println("New connection accepted");
 
-                    final String name = in.readLine();
+                    if (city == null) {
+                        out.println("введите первый город");
+                        city = in.readLine();
+                        out.println("ОК");
+                    } else {
+                        out.println("предыдущий город: " + city + ". Введите следующий город");
+                        newCity = in.readLine();
+                        lastLetter = city.charAt(city.length() - 1);
+                        firstLetter = newCity.charAt(0);
 
-                    System.out.println(String.format("%s, порт %d", name, clientSocket.getPort()));
+                        if (lastLetter == firstLetter) {
+                            out.println("ОК");
+                            city = newCity;
+                        } else {
+                            out.println("NOT OK");
+                        }
+                    }
 
-                    out.println("Отвали:)");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             }
         } catch (IOException e) {
